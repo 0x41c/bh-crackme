@@ -1,0 +1,524 @@
+<body>
+  <script>
+
+    // Utility to download dump
+    function downloadFile(file) {
+      // Create a link and set the URL using `createObjectURL`
+      const link = document.createElement("a");
+      link.style.display = "none";
+      link.href = URL.createObjectURL(file);
+      link.download = file.name;
+    
+      // It needs to be added to the DOM so it can be clicked
+      document.body.appendChild(link);
+      link.click();
+    
+      // To make this work on Firefox we need to wait
+      // a little while before removing it.
+      setTimeout(() => {
+        URL.revokeObjectURL(link.href);
+        link.parentNode.removeChild(link);
+      }, 0);
+    }
+    
+    
+    var program = atob(
+      "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"
+    )
+      .split("")
+      .map((b) => b.charCodeAt(0));
+    
+    var downloaded = false;
+    
+    function interpret(presetPointer, presetStack, variableCache) {
+      console.log(variableCache);
+      let length = 0;
+      var pointer = 0;
+      if (presetPointer != null) pointer = presetPointer;
+      if (variableCache == null) variableCache = [[]];
+    
+      var g = [];
+    
+      var stack = [];
+      if (presetStack != null) stack = Array.from(presetStack);
+    
+      var popStack = () => stack.pop();
+      var pushStack = function () {
+        stack.push(...arguments);
+      };
+    
+      var functionTable = [];
+    
+      for (
+        /**
+         * load(loadType)
+         * 
+         * @description: Loads an immediate value into the stack
+         * @argument loadType: 
+         *                     0: 32 bit integer
+         *                     1: String
+         *                     2: null
+         *                     3: [Object object]
+         */
+        functionTable[131] = () => {
+          var loadType = program[++pointer];
+          
+    
+          // 32 Bit integer
+          if (loadType == 0) {
+            let integer = (program[++pointer] << 24) | (program[++pointer] << 16) | (program[++pointer] << 8) | program[++pointer]
+            pushStack(integer)
+          }
+    
+          // String
+          else if (loadType == 1) {
+            var resultString = "";
+            var resultLength = (program[++pointer] << 8) | program[++pointer];
+            for (var i = 0; i < resultLength; i++)
+              resultString += String.fromCharCode(program[++pointer]);
+            pushStack(resultString);
+          }
+          
+          // Null
+          else if (loadType == 2) {
+            pushStack(null);
+          }
+          
+          // [Object object]
+          else if (loadType == 3) {
+            pushStack({});
+          }
+        },
+    
+        // I renamed the variable to swapMem to be more ambiguous, but the use is still correct (?)
+    
+        /**
+         * storePasswordChar(passwdType, charectorIdx)
+         * 
+         * @description: Stores the last value of the stack into the selected password array.
+         * @argument passwdType: Password array to select from.
+         * @argument charectorIdx: The index of the charector to store.
+         */
+        functionTable[132] = () => {
+          let l = program[++pointer]
+          let r = program[++pointer]
+          let rs = popStack()
+          variableCache[l][r] = rs;
+        },
+    
+        /**
+         * loadPasswordChar(passwdType, charectorIdx)
+         * 
+         * @description: Stores the selected charector fromt he password array onto the stack.
+         * @argument passwdType: Password array to select from.
+         * @argument charectorIdx: The index of the charector to load into the stack.
+         */
+        functionTable[7] = () => {
+          let l = program[++pointer]
+          let r = program[++pointer]
+          pushStack(variableCache[l][r]);
+        },
+    
+        /**
+         * throwError()
+         * 
+         * @description: Throws the value at the top of the stack.
+         */
+        functionTable[60] = () => {
+          let val = popStack();
+          throw val;
+        },
+    
+        /**
+         * popStack()
+         * 
+         * @description: Pops the last value on the stack
+         */
+        functionTable[113] = () => {
+          popStack();
+        },
+    
+        /**
+         * reverseStack(reverseCount)
+         * 
+         * @description: Reverses the order of the stack starting from the top down.
+         * @argument reverseCount: The amount of values on the stack to reverse
+         */
+        functionTable[38] = () => {
+          var [swapCount, stackLength] = [program[++pointer], stack.length - 1];
+    
+          // Efficient unrolled shortcut for reversing two elements
+          if (2 == swapCount) return void ([stack[stackLength], stack[stackLength - 1]] = [stack[stackLength - 1], stack[stackLength]]);
+          for (var c = [], d = 0; d < swapCount; d++) c.push(popStack());
+          pushStack(...c);
+        },
+    
+        /**
+         * invert()
+         * 
+         * @description: Inverts the first element of the stack
+         */
+        functionTable[62] = () => {
+          let val = popStack(); 
+          pushStack(!val);
+        },
+    
+        /**
+         * pushWindowToStack()
+         * 
+         * @description: Pushes globalThis to stack
+         */
+        functionTable[79] = () => {
+          pushStack(globalThis);
+        },
+    
+        /**
+         * createArray(length)
+         * 
+         * @description: Creates an array from a specified amount of values on the stack and pushes
+         *    the array back onto the stack.
+         * @argument length: The length of the array to create.
+         */
+        functionTable[22] = () => {
+          for (var a = [], b = (program[++pointer] << 8) | program[++pointer], c = 0; c < b; c++)
+            a.push(popStack());
+          pushStack(a);
+        },
+    
+        /**
+         * accessArray()
+         * 
+         * @description: Pops the first value off the stack and subscripts it by accessIdx.
+         */
+        functionTable[96] = () => {
+          var a = popStack();
+          pushStack(a[popStack()]);
+        },
+    
+        /**
+         * copyToStack()
+         * 
+         * @description: Duplicates the top value of the stack
+         */
+        functionTable[207] = () => {
+          var a = popStack();
+          pushStack(a, a);
+        },
+    
+        /**
+         * callStackFunction(functionOffset)
+         * 
+         * @description: Calls a function located a the offset from the top of the stack.
+         * Passes values located <functionOffset from the top of the stack to the applied function.
+         * @argument functionOffset: The offset from the top of the stack to the stored function.
+         */
+        functionTable[238] = () => {
+          for (var a = [], b = program[++pointer], c = 0; c < b; c++) a.push(popStack());
+          var d = popStack().apply(popStack(), a);
+          pushStack(d);
+        },
+    
+        /**
+         * clearStack()
+         * 
+         * @description: Sets the stack to an empty array
+         */
+        functionTable[86] = () => {
+          stack = [];
+        },
+    
+        /**
+         * quickAssignStackArray()
+         * 
+         * @description: Takes the top value, subscripts it using the value at offset one and assigns
+         * that index to the value at stack offset 3.
+         */
+        functionTable[121] = () => {
+          popStack()[popStack()] = popStack();
+        },
+    
+        /**
+         * getPC()
+         * 
+         * @description: pushes the program counter to the stack.
+         */
+        functionTable[11] = () => {
+          pushStack(pointer);
+        },
+    
+        /**
+         * stringifyTopStackVal()
+         * 
+         * @description: Takes the top of the stack and replaces it with a stringified version
+         */
+        functionTable[177] = () => {
+          pushStack(JSON.stringify(popStack()));
+        },
+    
+        /**
+         * setPC()
+         * 
+         * @description: Sets the PC to the value at the top of the stack.
+         */
+        functionTable[91] = () => ((pointer = popStack()), 1),
+    
+        /**
+         * xor()
+         * 
+         * @description: xors the two top values of the stack.
+         * @returns: result on top of stack in place of two values.
+         */
+        functionTable[184] = () => {
+          pushStack(popStack() ^ popStack());
+        },
+    
+    
+        /**
+         * greaterThanOrEqual()
+         * 
+         * @description: checks if the top value of the stack is greater than or equal to the second value of the stack.
+         * @returns: result on top of stack in place of two values.
+         */
+        functionTable[57] = () => {
+          pushStack(popStack() >= popStack());
+        },
+    
+        /**
+         * add()
+         * 
+         * @description: Adds the two values on the top of the stack.
+         * @returns: result on top of stack in place of two values.
+         */
+        functionTable[234] = () => {
+          pushStack(popStack() + popStack());
+        },
+    
+        /**
+         * mul()
+         * 
+         * @description: Multiplies the two values on the top of the stack.
+         * @returns: result on top of stack in place of two values.
+         */
+        functionTable[196] = () => {
+          pushStack(popStack() * popStack());
+        },
+    
+        /**
+         * sub()
+         * 
+         * @description: Subtracts the two values on the top of the stack.
+         * @returns: result on top of stack in place of two values.
+         */
+        functionTable[242] = () => {
+          pushStack(popStack() - popStack());
+        },
+    
+        /**
+         * sq()
+         * 
+         * @description: Squares the top value of the stack by the second top value.
+         * @returns: result on top of stack in place of two values.
+         */
+        functionTable[124] = () => {
+          pushStack(popStack() ** popStack());
+        },
+    
+        /**
+         * greaterThan()
+         * 
+         * @description: checks if the top value of the stack is greater than the second value of the stack.
+         * @returns: result on top of stack in place of two values.
+         */
+        functionTable[36] = () => {
+          pushStack(popStack() > popStack());
+        },
+    
+        /**
+         * mod()
+         * 
+         * @description: Gets the remainder of the top value of the stack divided by the one following it.
+         * @returns: result on top of stack in place of two values.
+         */
+        functionTable[127] = () => {
+          pushStack(popStack() % popStack());
+        },
+    
+        /**
+         * smallerThan()
+         * 
+         * @description: Checks if the top value of the stack is smaller then the one following it.
+         * @returns: result on top of stack in place of two values.
+         */
+        functionTable[226] = () => {
+          pushStack(popStack() < popStack());
+        },
+    
+        /**
+         * smallerThanOrEqualTo()
+         * 
+         * @description: Checks of the top value of the stack is smaller or equal to the one following it.
+         * @returns: result on top of stack in place of two values.
+         */
+        functionTable[71] = () => {
+          pushStack(popStack() <= popStack());
+        },
+    
+        /**
+         * logicalRightShift()
+         * 
+         * @description: Shifts the value at the top of the stack by the value of the one following it.
+         * @returns: result on top of stack in place of two values.
+         */
+        functionTable[236] = () => {
+          pushStack(popStack() >> popStack());
+        },
+    
+        /**
+         * logicalLeftShift()
+         * 
+         * @description: Shifts the value at the top of the stack by the value of the one following it.
+         * @returns: result on top of stack in place of two values.
+         */
+        functionTable[248] = () => {
+          pushStack(popStack() << popStack());
+        },
+    
+        /**
+         * bitwiseAnd()
+         * 
+         * @description: "and"s the value at the top of the stack by the value of the one following it.
+         * @returns: result on top of stack in place of two values.
+         */
+        functionTable[137] = () => {
+          pushStack(popStack() & popStack());
+        },
+    
+        /**
+         * bitwiseOr()
+         * 
+         * @description: "or"s the value at the top of the stack by the value of the one following it.
+         * @returns: result on top of stack in place of two values.
+         */
+        functionTable[175] = () => {
+          pushStack(popStack() | popStack());
+        },
+    
+        /**
+         * bitwiseNot()
+         * 
+         * @description: Bitwise nots the value at the top of the stack
+         * @returns: result on top of stack in place of the original value
+         */
+        functionTable[2] = () => {
+          pushStack(~popStack());
+        },
+    
+        /**
+         * notEqual()
+         * 
+         * @description: Checks if the two values at the top of the stack are not equal to each other
+         * @returns: result on top of stack in place of the original value
+         */
+        functionTable[107] = () => {
+          pushStack(popStack() != popStack());
+        },
+    
+        /**
+         * exit()
+         * 
+         * @description: sends the exit code to the interpreter
+         */
+        functionTable[111] = () => 2,
+    
+        /**
+         * pushAddr(num1, num2, num3)
+         * 
+         * @description: Pushes an address to a scope catcher of sorts TODO: Figure out what it is.
+         */
+        functionTable[98] = () => {
+          g.push((program[++pointer] << 16) | (program[++pointer] << 8) | program[++pointer]);
+        },
+    
+        /**
+         * pushInterpreterFunc()
+         * 
+         * @description: Puts the interpret function into the stack for interpreter recursion.
+         */
+        functionTable[104] = () => {
+          pushStack(interpret);
+        },
+    
+        /**
+         * increaseStackToLength(length)
+         *  
+         * @description: Pushes to the stack until desired length is aquired.
+         * @argument length: The amount to increase to.
+         */
+        functionTable[114] = () => {
+          for (var a = program[++pointer]; stack.length < a; ) pushStack(void 0);
+        },
+    
+        /**
+         * decreaseStackToLength(length)
+         * 
+         * @description: Pops the stack until desired length is aquired.
+         * @argument length: The amount to decrease to.
+         */
+        functionTable[85] = () => {
+          for (var a = program[++pointer]; stack.length > a; ) popStack();
+        },
+    
+        /**
+         * pushSwapToStack()
+         * 
+         * @description: Pushes the swap memory to the stack for access.
+         */
+        functionTable[138] = () => {
+          pushStack(variableCache);
+        },
+    
+        /**
+         * defineFunction()
+         * 
+         * @description: Creates a function located immediate to this instruction and pushes it to the stack.
+         *               Jumps to pointer in order to skip function.
+         */
+        functionTable[153] = () => (
+          (function () {
+            var a = pointer + 4;
+            pushStack(function () {
+              return interpret(a, arguments, [...variableCache, []], this);
+            });
+          })(),
+          (pointer = (program[++pointer] << 16) | (program[++pointer] << 8) | program[++pointer]),
+          1
+        );
+    
+        pointer < program.length;
+    
+      ) {
+        try {
+          var m = functionTable[program[pointer]]();
+          if (m)
+            if (1 == m) continue;
+            else if (2 == m) return popStack();
+        } catch (a) {
+          if (g.length) {
+            pushStack(a), (pointer = g.pop());
+            continue;
+          } else throw a;
+        }
+        pointer++;
+      }
+    }
+    interpret();
+    </script>
+<center>
+</br>
+</br>
+<input id="pass">
+</br>
+</br>
+<button onclick="alert(submit(pass.value, [14, 7, 92, 160, 95, 24, 196, 57, 231, 197, 237, 83, 112, 113, 249, 155, 154, 11, 15, 53, 53, 96, 144, 20]) ? 'Congratulations' : 'Bad password')">Check passwod</button>
+</center>
+</body>

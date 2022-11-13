@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "outDir": "./bin/",
+        "noImplicitAny": true,
+        "alwaysStrict": true,
+        "module": "commonjs",
+        "target": "ES6",
+    },
+    "include": ["./src/**/*"],
+    "exclude": ["node_modules"]
+}

@@ -1,0 +1,24 @@
+{
+  "name": "crackme-vm-dissasm",
+  "version": "1.0.0",
+  "description": "Disassembles and decompiles the opcodes lmao",
+  "author": "0x41c",
+  "license": "MIT",
+  "private": true,
+  "main": "./bin/main.js",
+  "scripts": {
+    "start": "npm run build && node .",
+    "start:nobuild": "node .",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/prettier": "^2.7.1",
+    "ts-loader": "^9.4.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.4"
+  },
+  "dependencies": {
+    "@types/node": "^18.11.7",
+    "prettier": "^2.7.1"
+  }
+}

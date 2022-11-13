@@ -1,0 +1,169 @@
+<body>
+  <script>
+    
+    // Utility to download dump
+    function downloadFile(file) {
+      const link = document.createElement("a");
+      link.style.display = "none";
+      link.href = URL.createObjectURL(file);
+      link.download = file.name;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        URL.revokeObjectURL(link.href);
+        link.parentNode.removeChild(link);
+      }, 0);
+    }
+    
+    
+    var program = atob(
+      "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"
+    )
+      .split("")
+      .map((b) => b.charCodeAt(0));
+
+
+    var instructionLines = [];
+
+    let names = {
+      "60": "thrs",   // Throw(stack)
+      "113": "pop",   // pop
+      "62": "lnt",    // logical not
+      "79": "pshwnd", // push window to stack
+      "96": "subscr", // subscript array on stack
+      "207": "cpy",   // copy
+      "86": "clrstk", // clear stack
+      "121": "asnarr",// assign to array
+      "11": "lpc",    // load pc
+      "177": "jstrfy",// json stringify
+      "91": "spc",    // set pc
+      "184": "xor",   // xor
+      "57": "gte",    // greater then or eq
+      "234": "add",   // add
+      "196": "mul",   // mul
+      "242": "sub",   // sub
+      "124": "sq",    // square
+      "36": "gt",     // greater than
+      "127": "mod",   // modulo
+      "226": "st",    // smaller than
+      "71": "ste",    // smaller than or equal
+      "236": "rs",    // right shift
+      "248": "ls",    // left shift
+      "137": "and",   // and
+      "175": "or",    // or
+      "2": "not",     // not
+      "107": "neq",   // not equal
+      "111": "ret",   // exit function
+      "104": "pshint",// push interpreter
+      "74": "thr",    // throw
+      "138": "pshvar" // Push variables to stack
+    }
+
+    for (var pointer = 0; pointer < program.length; pointer++) {
+      let currentInst = program[pointer];
+      let startPointer = pointer;
+
+      let addLine = (line) => {
+        let hex = startPointer.toString(16).toUpperCase();
+        let dec = startPointer.toString();
+        if (hex.length != 4) hex = "0".repeat(4 - hex.length) + hex;
+        if (dec.length != 4) dec = "0".repeat(4 - dec.length) + dec;
+
+        line = `0x${hex} (${dec}): ${line}`
+        if (line.includes("def")) line = `\n${line}`;
+
+        if (line.includes("spc")) {
+          let depth = 0
+          let unconditionalBranch = true;
+
+          for (var name of ["xor", "push", "push"])
+            !instructionLines[instructionLines.length - (++depth)].includes(name)
+              && (unconditionalBranch = false);
+          
+          unconditionalBranch && (line += `\n`)
+        }
+
+        instructionLines.push(line)
+      }
+
+      switch (currentInst) {
+        case 131: {
+          let desc = "push ";
+          let loadType = program[++pointer]
+          
+          if (loadType == 0) {
+            let integer = (program[++pointer] << 24) | (program[++pointer] << 16) | (program[++pointer] << 8) | program[++pointer]
+            desc += integer.toString();
+          }
+
+          else if (loadType == 1) {
+            let resultString = "";
+            let resultLength = (program[++pointer] << 8) | program[++pointer]
+            for (var i = 0; i < resultLength; i++)
+              resultString += String.fromCharCode(program[++pointer]);
+            desc += `"${resultString}"`;
+          }
+
+          else if (loadType == 2) {
+            desc += "null"
+          }
+
+          else if (loadType == 3) {
+            desc += "{}"
+          }
+          addLine(desc);
+          break;
+        }
+        case 132: {
+          let x = program[++pointer], y = program[++pointer];
+          addLine(`st ${x}, ${y} // variables[${x}][${y}] = pop()`);
+          break;
+        }
+        case 7: {
+          let x = program[++pointer], y = program[++pointer];
+          addLine(`ld ${x}, ${y} // push(variables[${x}][${y}])`);
+          break;
+        }
+        case 38: {
+          addLine(`rvstk ${program[++pointer]}`);
+          break;
+        }
+        case 22: {
+          addLine(`crtarr ${(program[++pointer] << 8) | program[++pointer]}`);
+          break;
+        }
+        case 238: {
+          let x = program[++pointer];
+          addLine(`call ${x}`);
+          break;
+        }
+        case 98: {
+          addLine(`pushcp ${(program[++pointer] << 16) | (program[++pointer] << 8) | program[++pointer]}`);
+          break;
+        }
+        case 114: {
+          addLine(`incstk ${program[++pointer]}`);
+          break;
+        }
+        case 85: {
+          addLine(`decstk ${program[++pointer]}`);
+          break;
+        }
+        case 153: {
+          addLine(`def ${(program[++pointer] << 16) | (program[++pointer] << 8) | program[++pointer]} // function start below\n`);
+          break;
+        }
+        default: {
+          if (names[currentInst.toString()] != null) {
+            addLine(names[currentInst.toString()]);
+            break;
+          }
+          console.log(`Unknown instruction: ${pointer} (${program[pointer]} | ${String.fromCharCode(program[pointer])})`);
+        }
+      }
+    }
+
+    downloadFile(new File([instructionLines.join("\n")], "reverse.blob.o"));
+    
+    </script>
+</body>

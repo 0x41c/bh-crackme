@@ -1,0 +1,286 @@
+{
+    "instructions": {
+      "ADD": {
+        "name": "add",
+        "opcode": 234
+      },
+      "AND": {
+        "name": "and",
+        "opcode": 137
+      },
+      "ASSIGN_ARRAY": {
+        "name": "asnarr",
+        "opcode": 121
+      },
+      "CALL_FUNCTION_IN_STACK": {
+        "name": "call",
+        "opcode": 238,
+        "argumentCount": 1,
+        "parameterCount": 1
+      },
+      "CLEAR_STACK": {
+        "name": "clrstk",
+        "opcode": 86
+      },
+      "COPY": {
+        "name": "cpy",
+        "opcode": 207
+      },
+      "CREATE_ARRAY": {
+        "name": "crtarr",
+        "opcode": 22,
+        "argumentCount": 2,
+        "parameterCount": 1
+      },
+      "DEFINE_FUNCTION_START": {
+        "name": "def",
+        "opcode": 153,
+        "argumentCount": 3,
+        "parameterCount": 1
+      },
+      "DEFLATE_STACK": {
+        "name": "defstk",
+        "opcode": 85,
+        "argumentCount": 1,
+        "parameterCount": 1
+      },
+      "EXIT_FUNCTION": {
+        "name": "ret",
+        "opcode": 111
+      },
+      "GREATER_THAN": {
+        "name": "gt",
+        "opcode": 36
+      },
+      "GREATER_THAN_OR_EQUAL": {
+        "name": "gte",
+        "opcode": 57
+      },
+      "INFLATE_STACK": {
+        "name": "infstk",
+        "opcode": 114,
+        "argumentCount": 1,
+        "parameterCount": 1
+      },
+      "JSON_STRINGIFY": {
+        "name": "jstrfy",
+        "opcode": 177
+      },
+      "LEFT_SHIFT": {
+        "name": "ls",
+        "opcode": 248
+      },
+      "LOAD_FROM_VARIABLE": {
+        "name": "ld",
+        "opcode": 7,
+        "argumentCount": 2,
+        "parameterCount": 2
+      },
+      "LOAD_PC": {
+        "name": "lpc",
+        "opcode": 11
+      },
+      "LOGICAL_NOT": {
+        "name": "lnt",
+        "opcode": 62
+      },
+      "MODULUS": {
+        "name": "mod",
+        "opcode": 127
+      },
+      "MULTIPLY": {
+        "name": "mul",
+        "opcode": 196
+      },
+      "NOT": {
+        "name": "not",
+        "opcode": 2
+      },
+      "NOT_EQUAL": {
+        "name": "neq",
+        "opcode": 107
+      },
+      "OR": {
+        "name": "or",
+        "opcode": 175
+      },
+      "POP_STACK": {
+        "name": "pop",
+        "opcode": 113
+      },
+      "PUSH_CATCH_POINTER": {
+        "name": "pushcp",
+        "opcode": 98,
+        "argumentCount": 3,
+        "parameterCount": 1
+      },
+      "PUSH_IMMEDIATE": {
+        "name": "push",
+        "opcode": 131,
+        "variableArguments": true,
+        "parameterCount": 1
+      },
+      "PUSH_INTERPRETER_TO_STACK": {
+        "name": "pshint",
+        "opcode": 104
+      },
+      "PUSH_VARS_TO_STACK": {
+        "name": "pshvar",
+        "opcode": 138
+      },
+      "PUSH_WINDOW": {
+        "name": "pshwnd",
+        "opcode": 79
+      },
+      "REVERSE_STACK": {
+        "name": "rvstk",
+        "opcode": 38,
+        "argumentCount": 1,
+        "parameterCount": 1
+      },
+      "RIGHT_SHIFT": {
+        "name": "rs",
+        "opcode": 236
+      },
+      "SET_PC": {
+        "name": "spc",
+        "opcode": 91
+      },
+      "SMALLER_THAN": {
+        "name": "st",
+        "opcode": 226
+      },
+      "SMALLER_THAN_OR_EQUAL": {
+        "name": "ste",
+        "opcode": 71
+      },
+      "SQUARE": {
+        "name": "sq",
+        "opcode": 124
+      },
+      "STORE_IN_VARIABLE": {
+        "name": "st",
+        "opcode": 132,
+        "argumentCount": 2,
+        "parameterCount": 2
+      },
+      "SUBSCRIPT_ARRAY": {
+        "name": "subscr",
+        "opcode": 96
+      },
+      "SUBTRACT": {
+        "name": "sub",
+        "opcode": 242
+      },
+      "THROW": {
+        "name": "thr",
+        "opcode": 74
+      },
+      "THROW_STACK_POP": {
+        "name": "thrs",
+        "opcode": 60
+      },
+      "XOR": {
+        "name": "xor",
+        "opcode": 184
+      }
+    },
+    "conventions": [
+      {
+        "name": "double_push_math",
+        "sequence": [
+          {
+            "instruction": "PUSH_IMMEDIATE"
+          },
+          {
+            "instruction": "PUSH_IMMEDIATE"
+          },
+          { 
+            "type": "math"
+          }
+        ]
+      },
+      {
+        "name": "double_push_spc",
+        "sequence": [
+          {
+            "instruction": "PUSH_IMMEDIATE"
+          },
+          {
+            "instruction": "PUSH_IMMEDIATE"
+          },
+          {
+            "instruction": "XOR"
+          },
+          { 
+            "instruction": "SET_PC"
+          }
+        ]
+      },
+      {
+        "name": "function_definition",
+        "sequence": [
+            {
+                "instruction": "DEFINE_FUNCTION_START"
+            }
+        ]
+      }
+    ],
+    "instructionTypes": {
+      "math": [
+        "ADD",
+        "AND",
+        "GREATER_THAN",
+        "GREATER_THAN_OR_EQUAL",
+        "LEFT_SHIFT",
+        "LOGICAL_NOT",
+        "MODULUS",
+        "MULTIPLY",
+        "NOT",
+        "NOT_EQUAL",
+        "OR",
+        "RIGHT_SHIFT",
+        "SMALLER_THAN",
+        "SMALLER_THAN_OR_EQUAL",
+        "SQUARE",
+        "SUBTRACT",
+        "XOR"
+      ],
+      "stack": [
+        "CLEAR_STACK",
+        "COPY",
+        "DEFLATE_STACK",
+        "INFLATE_STACK",
+        "POP_STACK",
+        "PUSH_CATCH_POINTER",
+        "PUSH_IMMEDIATE",
+        "PUSH_INTERPRETER_TO_STACK",
+        "PUSH_VARS_TO_STACK",
+        "PUSH_WINDOW",
+        "REVERSE_STACK"
+      ],
+      "control_flow": [
+        "LOAD_PC",
+        "SET_PC",
+        "THROW",
+        "THROW_STACK_POP"
+      ],
+      "function": [
+        "CALL_FUNCTION_IN_STACK",
+        "EXIT_FUNCTION",
+        "DEFINE_FUNCTION_START"
+      ],
+      "variable": [
+        "STORE_IN_VARIABLE",
+        "LOAD_FROM_VARIABLE"
+      ],
+      "array": [
+        "ASSIGN_ARRAY",
+        "CREATE_ARRAY",
+        "SUBSCRIPT_ARRAY"
+      ],
+      "misc": [
+        "JSON_STRINGIFY"
+      ]
+    }
+  }
