@@ -5,6 +5,7 @@ const ast_1 = require("./ast");
 const token_1 = require("./token");
 let identToFunction = {};
 let identToVariable = {};
+let variablesSim = [[], [], [], []];
 class _tokenParser {
     constructor(tokens, depth) {
         this.checkedAddresses = [];
@@ -141,30 +142,49 @@ class _tokenParser {
         let objId = this.stackState.pop();
         let subScriptId = this.stackState.pop();
         let valueId = this.stackState.pop();
+        let shouldTrack = true;
+        if (valueId &&
+            identToVariable[valueId.name] &&
+            identToVariable[valueId.name].declaration.init.type == ast_1._AST_Type.Literal) {
+            this.redact();
+            shouldTrack = false;
+            valueId = identToVariable[valueId.name].declaration.init;
+        }
         if (objId.name != "variables") {
             let decl = identToVariable[objId.name];
             let memberExpr = decl.declaration.init;
             let realObjId = memberExpr.object;
             if (realObjId.type == ast_1._AST_Type.Identifier) {
                 let firstSubId = memberExpr.property;
-                let secondSubId = subScriptId;
-                let obj;
-                if (!Object.keys(identToVariable).includes(realObjId.name))
-                    obj = realObjId;
-                else
-                    obj = identToVariable[realObjId.name].declaration.init;
-                let sub1;
-                if (firstSubId.type == ast_1._AST_Type.Literal)
-                    sub1 = firstSubId;
-                else
-                    sub1 = identToVariable[firstSubId.name].declaration.init;
-                let sub2 = identToVariable[secondSubId.name].declaration
-                    .init;
-                this.redact(4);
-                let memberExpr1 = new ast_1.MemberExpression(obj, sub1);
-                let memberExpr2 = new ast_1.MemberExpression(memberExpr1, sub2);
-                let assignmentExpr = new ast_1.AssignmentExpression("=", memberExpr2, valueId);
-                return new ast_1.ExpressionStatement(assignmentExpr);
+                if (!(firstSubId.type != ast_1._AST_Type.Literal &&
+                    !identToVariable[firstSubId.name])) {
+                    let secondSubId = subScriptId;
+                    let obj;
+                    if (!Object.keys(identToVariable).includes(realObjId.name))
+                        obj = realObjId;
+                    else
+                        obj = identToVariable[realObjId.name].declaration
+                            .init;
+                    let sub1;
+                    if (firstSubId.type == ast_1._AST_Type.Literal)
+                        sub1 = firstSubId;
+                    else
+                        sub1 = identToVariable[firstSubId.name].declaration.init;
+                    let sub2 = identToVariable[secondSubId.name].declaration
+                        .init;
+                    this.redact(2);
+                    if (obj.name == "variables") {
+                        let idx1 = sub1.value;
+                        let idx2 = sub2.value;
+                        if (idx1 && idx2 && valueId && shouldTrack) {
+                            variablesSim[idx1][idx2] = valueId;
+                        }
+                    }
+                    let memberExpr1 = new ast_1.MemberExpression(obj, sub1);
+                    let memberExpr2 = new ast_1.MemberExpression(memberExpr1, sub2);
+                    let assignmentExpr = new ast_1.AssignmentExpression("=", memberExpr2, valueId);
+                    return new ast_1.ExpressionStatement(assignmentExpr);
+                }
             }
         }
         let memberExpr = new ast_1.MemberExpression(objId, subScriptId);
@@ -189,7 +209,16 @@ class _tokenParser {
                 subScrpVar = new ast_1.Identifier("UNKNOWN");
             else
                 subScrpVar = identToVariable[subScriptId.name].declaration.init;
-            let arrExpr = new ast_1.MemberExpression(obj.declaration.init, subScrpVar);
+            if (subScrpVar.type == ast_1._AST_Type.Literal &&
+                typeof subScrpVar.value == "string")
+                this.redact(2);
+            else
+                this.redact(2);
+            // TODO: Better fix for literal subscripting;
+            let val = obj.declaration.init;
+            if (val.type == ast_1._AST_Type.Literal)
+                val = id;
+            let arrExpr = new ast_1.MemberExpression(val, subScrpVar);
             return this.defineVar(arrExpr);
         }
         let arrExpr = new ast_1.MemberExpression(id, subScriptId);
@@ -205,9 +234,20 @@ class _tokenParser {
     }
     // TODO: Disambiguate the use of "variables"
     visitVariableStore() {
-        let memberExpr1 = new ast_1.MemberExpression(new ast_1.Identifier("variables"), new ast_1.Literal(this.curr.parameters[0]));
-        let memberExpr2 = new ast_1.MemberExpression(memberExpr1, new ast_1.Literal(this.curr.parameters[1]));
-        let assignmentExpr = new ast_1.AssignmentExpression("=", memberExpr2, this.stackState.pop());
+        let idx1 = this.curr.parameters[0];
+        let idx2 = this.curr.parameters[1];
+        let assignee = this.stackState.pop();
+        if (assignee &&
+            identToVariable[assignee.name] &&
+            identToVariable[assignee.name].declaration.init.type == ast_1._AST_Type.Literal) {
+            assignee = identToVariable[assignee.name].declaration.init;
+        }
+        else {
+            variablesSim[idx1][idx2] = assignee;
+        }
+        let memberExpr1 = new ast_1.MemberExpression(new ast_1.Identifier("variables"), new ast_1.Literal(idx1));
+        let memberExpr2 = new ast_1.MemberExpression(memberExpr1, new ast_1.Literal(idx2));
+        let assignmentExpr = new ast_1.AssignmentExpression("=", memberExpr2, assignee);
         return new ast_1.ExpressionStatement(assignmentExpr);
     }
     visitVariableLoad() {
@@ -231,6 +271,24 @@ class _tokenParser {
         // Fill in function values
         let functionIdent = this.stackState[this.stackState.length - paramCount - 1];
         let funcDecl = identToFunction[functionIdent.name];
+        if (!funcDecl) {
+            let varDecl = identToVariable[functionIdent.name];
+            if (varDecl) {
+                let init = varDecl.declaration.init;
+                if (init.type == ast_1._AST_Type.MemberExpression) {
+                    let objId = init.object.object;
+                    if (objId && objId.type == ast_1._AST_Type.Identifier) {
+                        let lit1 = init.object.property;
+                        let lit2 = init.property;
+                        if (lit1.type == ast_1._AST_Type.Literal &&
+                            lit2.type == ast_1._AST_Type.Literal) {
+                            funcDecl =
+                                identToFunction[variablesSim[lit1.value][lit2.value].name];
+                        }
+                    }
+                }
+            }
+        }
         if (funcDecl) {
             funcDecl.paramCount = paramCount;
             let simStack = [];
@@ -269,7 +327,8 @@ class _tokenParser {
     visitThrowStatement() {
         // Throws are a joke lmao
         let catchAddr = this.last().parameters[0];
-        this.stackState.push(this.stackState[this.stackState.length - 1]);
+        if (this.curr.configKey != "THROW_STACK_POP")
+            this.stackState.push(this.stackState[this.stackState.length - 1]);
         this.jumpToAddr(catchAddr);
         return;
     }
@@ -289,24 +348,31 @@ class _tokenParser {
             token.configKey != "SET_PC"))
             ;
         let conditionId = this.stackState[this.stackState.length - 1];
+        let decl = identToVariable[conditionId.name];
         let startAddr = tokens[0].address;
         let endAddr = (tokens[2].parameters[0] ^ tokens[3].parameters[0]) + startAddr;
         let rel1 = (tokens[7].parameters[0] ^ tokens[8].parameters[0]) - startAddr;
         let rel2 = rel1 - (tokens[11].parameters[0] ^ tokens[12].parameters[0]);
         let consequentAddr = rel2 + endAddr;
-        let consequentBlock = new ast_1.BlockStatement([]);
-        consequentBlock.body = this.enterNextScope(consequentAddr, [
-            ...this.stackState,
-        ]);
-        this.jumpToAddr(endAddr);
-        return new ast_1.IfStatement(conditionId, consequentBlock);
+        if (decl &&
+            decl.declaration.init.type == ast_1._AST_Type.Literal &&
+            decl.declaration.init.value)
+            this.jumpToAddr(consequentAddr);
+        else {
+            let consequentBlock = new ast_1.BlockStatement([]);
+            consequentBlock.body = this.enterNextScope(consequentAddr, [
+                ...this.stackState,
+            ]);
+            this.jumpToAddr(endAddr);
+            return new ast_1.IfStatement(conditionId, consequentBlock);
+        }
     }
     visitStackVarDecl() {
         let init = null;
         switch (this.curr.configKey) {
             case "COPY":
-                init = this.stackState[this.stackState.length - 1];
-                break;
+                this.stackState.push(this.stackState[this.stackState.length - 1]);
+                return;
             case "PUSH_IMMEDIATE":
                 init = new ast_1.Literal(this.curr.parameters[0]); // A single immediate is provided
                 if (init.value == "Function")
