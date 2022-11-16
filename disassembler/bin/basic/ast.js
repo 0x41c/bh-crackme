@@ -197,7 +197,7 @@ class UnaryExpression extends _AST_Node {
         this.argument = argument;
     }
     stringRepresentation() {
-        return `${this.prefix ? this.operator : ""}${this.argument}${!this.prefix ? this.operator : ""}`;
+        return `${this.prefix ? this.operator : ""}${this.argument.stringRepresentation()}${!this.prefix ? this.operator : ""}`;
     }
 }
 exports.UnaryExpression = UnaryExpression;

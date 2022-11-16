@@ -127,12 +127,6 @@ class _tokenParser {
 
     let blk = parser.visitBlockBody();
 
-    let newAddresses = parser.checkedAddresses;
-    newAddresses = newAddresses.filter(
-      (v) => !this.checkedAddresses.includes(v)
-    );
-    this.checkedAddresses.push(...newAddresses);
-
     return blk;
   }
 
@@ -402,7 +396,7 @@ class _tokenParser {
       }
     }
 
-    if (funcDecl) {
+    if (funcDecl && funcDecl.block.body.length == 0) {
       funcDecl.paramCount = paramCount;
 
       let simStack: Identifier[] = [];
@@ -492,6 +486,10 @@ class _tokenParser {
 
     let consequentAddr = rel2 + endAddr;
 
+    for (let token of tokens)
+      if (!this.checkedAddresses.includes(token.address))
+        this.checkedAddresses.push(token.address);
+
     if (
       decl &&
       decl.declaration.init.type == _AST_Type.Literal &&
@@ -504,7 +502,18 @@ class _tokenParser {
         ...this.stackState,
       ]);
 
+      if (this.last().configKey == "LOGICAL_NOT") {
+        if(this.stackState[this.stackState.length - 1]) {
+          let name = "!" + this.stackState[this.stackState.length - 1].name
+          name = `!var${parseInt(name.split("var")[1]) - 1}`;
+          conditionId.name = name;
+        }
+        else conditionId.name = "!UNKNOWN"; 
+        this.redact();
+      }
+
       this.jumpToAddr(endAddr);
+
       return new IfStatement(conditionId, consequentBlock);
     }
   }
@@ -583,8 +592,6 @@ class _tokenParser {
         operator = "> = ";
       case "LEFT_SHIFT":
         operator = "<<";
-      case "LOGICAL_NOT":
-        operator = "!";
       case "MODULUS":
         operator = "%";
       case "MULTIPLY":
@@ -613,7 +620,7 @@ class _tokenParser {
         this.curr.configKey == "LOGICAL_NOT"
       ) {
         let unaryExpr = new UnaryExpression(
-          this.curr.configKey == "NOT" ? "~" : "~",
+          this.curr.configKey == "NOT" ? "~" : "!",
           true,
           this.stackState.pop()
         );

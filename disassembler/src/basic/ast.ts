@@ -251,7 +251,7 @@ export class UnaryExpression extends _AST_Node {
   }
 
   stringRepresentation(): string {
-    return `${this.prefix ? this.operator : ""}${this.argument}${
+    return `${this.prefix ? this.operator : ""}${this.argument.stringRepresentation()}${
       !this.prefix ? this.operator : ""
     }`;
   }
